@@ -17,10 +17,12 @@ begin
 
   options.parse!
 
-  FileUtils.mkdir_p("#{ENV['HOME']}/.puppet/manifests") unless File.exists?("#{ENV['HOME']}/.puppet")
+  FileUtils.mkdir_p("#{ENV['HOME']}/.puppet/manifests") unless File.exists?("#{ENV['HOME']}/.puppet/manifests")
+  FileUtils.mkdir_p("#{ENV['HOME']}/.puppet/modules") unless File.exists?("#{ENV['HOME']}/.puppet/modules")
 
-  manifest = ARGV[0]
-  raise "The manifest #{ENV['HOME']}/.puppet/manifests/#{manifest} does not exist" unless File.exists?("#{ENV['HOME']}/.puppet/#{manifest}.pp")
+  manifest = ARGV[0].nil? ? "default.pp" : "#{ARGV[0]}.pp"
+
+  system("puppet apply #{ENV['HOME']}/.puppet/manifests/#{manifest} --modulepath=#{ENV['HOME']}/.puppet/modules")
 
 rescue LoadError => e
   puts e.message
