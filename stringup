@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+
+begin
+  require "rubygems"
+  require "puppet"
+  require "facter"
+  require "fileutils"
+  require "optparse"
+
+  options = OptionParser.new do |opt|
+    opt.banner = "USAGE: stringup {-h} run"
+    opt.on("-h", "--help", "help") do
+      puts options
+      exit
+    end
+  end
+
+  options.parse!
+
+  FileUtils.mkdir_p("#{ENV['HOME']}/.puppet/manifests") unless File.exists?("#{ENV['HOME']}/.puppet")
+
+  manifest = ARGV[0]
+  raise "The manifest #{ENV['HOME']}/.puppet/manifests/#{manifest} does not exist" unless File.exists?("#{ENV['HOME']}/.puppet/#{manifest}.pp")
+
+rescue LoadError => e
+  puts e.message
+  puts "You don't have Puppet installed. Installing it now."
+  sudo = File.writable?(%x[gem environment| grep "INSTALLATION DIRECTORY"| awk -F':' '{print $2}'].strip) ? "" : "sudo "
+  system("#{sudo} gem install puppet facter --no-ri --no-rdoc")
+end
